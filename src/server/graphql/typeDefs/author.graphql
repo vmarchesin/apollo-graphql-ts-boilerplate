@@ -1,0 +1,33 @@
+type Author {
+  id: ID!
+  name: String!
+  bio: String
+  profilePicture: String
+  posts(pagination: PaginationInput, filter: FilterInput): PostConnection!
+}
+
+type AuthorEdge {
+  cursor: Cursor!
+  node: Author!
+}
+
+type AuthorConnection {
+  edges: [AuthorEdge]!
+  pageInfo: PageInfo!
+}
+
+type Query {
+  author(id: ID!): Author
+  allAuthors(pagination: PaginationInput, filter: FilterInput): AuthorConnection!
+}
+
+type Mutation {
+  addAuthor(name: String!): Author
+  deleteAuthor(id: ID!): Author
+  editAuthor(
+    id: ID!
+    name: String
+    bio: String
+    profilePicture: String
+  ): Author
+}

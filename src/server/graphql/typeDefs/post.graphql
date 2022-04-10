@@ -1,0 +1,29 @@
+type Post {
+  id: ID!
+  author: Author!
+  content: String!
+}
+
+type PostEdge {
+  cursor: Cursor!
+  node: Post!
+}
+
+type PostConnection {
+  edges: [PostEdge]!
+  pageInfo: PageInfo!
+}
+
+type Query {
+  post(id: ID!): Post
+  allPosts(pagination: PaginationInput, filter: FilterInput): PostConnection!
+}
+
+type Mutation {
+  addPost(content: String!, authorId: ID!): Post
+  deletePost(id: ID!): Post
+  editPost(
+    id: ID!
+    content: String!
+  ): Post
+}

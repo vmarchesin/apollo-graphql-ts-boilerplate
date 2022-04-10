@@ -1,0 +1,68 @@
+version: "3.9"
+services:
+  apollo-db:
+    container_name: apollo-db
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - apollo-db:/var/lib/postgresql/data
+    ports:
+      - 5433:${POSTGRES_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - apollo
+
+  apollo-backend:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: devbase
+    env_file:
+      - .env
+    volumes:
+      - ./src:/src
+      - ./nodemon.json:/nodemon.json
+      - ./prisma:/prisma
+    container_name: apollo-apollo-backend
+    command: npm run dev:server
+    ports:
+      - ${PORT}:${PORT}
+    networks:
+      - apollo
+    links:
+      - apollo-db
+
+
+  prisma-studio:
+    restart: unless-stopped
+    container_name: prisma-studio
+    build:
+      context: .
+      dockerfile: ./prisma/studio/Dockerfile
+    env_file:
+     - .env
+    depends_on:
+      apollo-db:
+        condition: service_healthy
+    command: npm run prisma:studio
+    ports:
+      - 5555:${PRISMA_STUDIO_PORT}
+    networks:
+      - apollo
+    links:
+      - apollo-db
+
+volumes:
+  apollo-db:
+
+networks:
+  apollo:
+    name: apollo
